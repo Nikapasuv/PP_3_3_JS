@@ -1,8 +1,13 @@
 package ru.kata.spring.boot_security.demo.controller;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
@@ -21,16 +26,15 @@ public class AdminController {
     }
 
     @GetMapping()
-    public String getUsers(Model model) {
+    public String getUsers(Model model, Principal principal, @ModelAttribute("user") User user) {
+        User currentUser = userService.findByUsername(principal.getName());
+
         model.addAttribute("table_name", "Users");
         model.addAttribute("users", userService.getAllUsers());
-        return "adminPages/admin";
-    }
-
-    @GetMapping(value = "/addUser")
-    public String addUser(@ModelAttribute("user") User user, Model model) {
         model.addAttribute("roles", roleService.getAllRoles());
-        return "adminPages/addUser";
+        model.addAttribute("current_user", currentUser);
+
+        return "adminPages/admin";
     }
 
     @PostMapping()
@@ -39,36 +43,29 @@ public class AdminController {
         return "redirect:/admin";
     }
 
-    @GetMapping(value = "/{id}/edit")
-    public String editUser(Model model, @PathVariable("id") int id) {
-        model.addAttribute("roles", roleService.getAllRoles());
-        model.addAttribute("user", userService.findUser(id));
-        return "adminPages/editUser";
-    }
+    @PatchMapping("/{id}")
+    public String update(@ModelAttribute("user") User user, Principal principal, @PathVariable("id") Integer id) {
+        int currentId = userService.findByUsername(principal.getName()).getId();
 
-    @PatchMapping()
-    public String update(@ModelAttribute("user") User user) {
+        // если админ обновляет свою собственную учетку, даннные в Authentication (откуда мы тянем principal) также обновятся, и в navbar будет сразу актуальная информация
+        if (id == currentId) {
+            Authentication auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            RequestContextHolder.currentRequestAttributes().setAttribute("SPRING_SECURITY_CONTEXT", auth, RequestAttributes.SCOPE_SESSION);
+        }
+
         userService.updateUser(user);
         return "redirect:/admin";
     }
 
-    @GetMapping(value = "/{id}/delete")
-    public String deleteUser(Model model, @PathVariable("id") int id) {
-        model.addAttribute("delete_text", "Are you sure you want to delete the user?");
-        model.addAttribute("user", userService.findUser(id));
-        return "adminPages/deleteUser";
+    @DeleteMapping("/{id}")
+    public String delete(@PathVariable("id") Integer id, Principal principal) {
+        int currentId = userService.findByUsername(principal.getName()).getId();
+
+        userService.deleteUser(id);
+
+        // если админ удаляет свою собственную учетку, происходит логаут
+        return (id == currentId) ? "redirect:/logout" : "redirect:/admin";
     }
 
-    @DeleteMapping()
-    public String delete(@ModelAttribute("user") User user, Principal principal) {
-        User thisUser = userService.findByUsername(principal.getName());
-
-        userService.deleteUser(user.getId());
-
-        if (thisUser.getUsername().equals(user.getUsername())) {
-            return "redirect:/logout";
-        } else {
-            return "redirect:/admin";
-        }
-    }
 }

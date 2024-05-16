@@ -32,7 +32,9 @@ public class Role implements GrantedAuthority {
 
     @Override
     public String toString() {
+
         return name.replaceAll("ROLE_", "");
+
     }
 
     @Override
@@ -44,6 +46,8 @@ public class Role implements GrantedAuthority {
 
         return id == role.id && name.equals(role.name);
     }
+
+
 
     @Override
     public String getAuthority() {

@@ -32,7 +32,7 @@ public class User implements UserDetails {
     @Column(name = "password")
     private String password;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "users_roles")
     private List<Role> roles;
 
@@ -55,6 +55,23 @@ public class User implements UserDetails {
         return roles;
     }
 
+    public String getRolesToString() {
+        StringBuilder sb = new StringBuilder();
+        for (Role role : roles) {
+            sb.append(role.toString()).append(" ");
+        }
+        return sb.toString();
+    }
+
+    public boolean userIsAdmin() {
+        for (Role role : roles) {
+            if (role.getName().equals("ROLE_ADMIN")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -66,6 +83,8 @@ public class User implements UserDetails {
                 lastName.equals(user.lastName) && age == user.age && password.equals(user.password) &&
                 roles.equals(user.roles);
     }
+
+
 
     @Override
     public List<Role> getAuthorities() {
