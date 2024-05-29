@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findUser(Integer id) {
-        return userRepository.getReferenceById(id);
+        return userRepository.findById(id).get();
     }
 
     @Override
@@ -44,7 +44,9 @@ public class UserServiceImpl implements UserService {
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
+
         userRepository.save(user);
+
     }
 
     @Override
@@ -72,5 +74,4 @@ public class UserServiceImpl implements UserService {
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
                 user.getRoles());
     }
-
 }

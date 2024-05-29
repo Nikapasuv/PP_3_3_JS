@@ -1,0 +1,28 @@
+
+
+#ageNewForm {
+    width: 20rem;
+}
+
+.navbar {
+    max-height: 50px;
+    min-height: 50px;
+}
+
+.form-control {
+    height: 2rem;
+}
+
+#userRolesEditForm {
+    width: 44%;
+    margin-top: -2%;
+}
+
+#rolesDeleteForm {
+    width: 44%;
+    margin-top: -2%;
+}
+
+#userRolesNewForm {
+    margin-top: -8%;
+}

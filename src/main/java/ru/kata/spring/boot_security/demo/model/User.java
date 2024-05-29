@@ -33,9 +33,7 @@ public class User implements UserDetails {
     private String password;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "user_role",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JoinTable(name = "users_roles")
     private List<Role> roles;
 
     public User() {
@@ -65,15 +63,6 @@ public class User implements UserDetails {
         return sb.toString();
     }
 
-    public boolean userIsAdmin() {
-        for (Role role : roles) {
-            if (role.getName().equals("ROLE_ADMIN")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -86,7 +75,19 @@ public class User implements UserDetails {
                 roles.equals(user.roles);
     }
 
+    @Override
+    public int hashCode() {
+        int result = (id ^ (id >>> 32));
 
+        result = 31 * result + firstName.hashCode();
+        result = 31 * result + lastName.hashCode();
+        result = 31 * result + age;
+        result = 31 * result + username.hashCode();
+        result = 31 * result + password.hashCode();
+        result = 31 * result + roles.hashCode();
+
+        return result;
+    }
 
     @Override
     public List<Role> getAuthorities() {
@@ -112,4 +113,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }

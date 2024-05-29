@@ -1,17 +1,19 @@
 package ru.kata.spring.boot_security.demo.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+
 import javax.persistence.*;
 import java.util.List;
-import org.springframework.security.core.GrantedAuthority;
-import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "roles")
-@Data
 public class Role implements GrantedAuthority {
-
     @Id
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
@@ -19,9 +21,11 @@ public class Role implements GrantedAuthority {
     private String name;
 
     @ManyToMany(mappedBy = "roles")
+    @JsonIgnore
     private List<User> users;
 
     public Role() {
+
     }
 
     public Role(String name) {
@@ -41,6 +45,15 @@ public class Role implements GrantedAuthority {
         Role role = (Role) o;
 
         return id == role.id && name.equals(role.name);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+
+        result = 31 * result * name.hashCode();
+
+        return result;
     }
 
     @Override

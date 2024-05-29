@@ -26,12 +26,12 @@ public class AdminSettings {
         roleService.addRole(roleAdmin);
         roleService.addRole(roleUser);
 
-        User admin = new User("admin", "admin", 33, "admin", "admin");
+        User admin = new User("admin", "admin", 10, "admin", "admin");
         admin.getRoles().add(roleService.getRole("ROLE_ADMIN"));
         admin.getRoles().add(roleService.getRole("ROLE_USER"));
         userService.addUser(admin);
 
-        User user = new User("user", "user", 55, "user", "user");
+        User user = new User("user", "user", 20, "user", "user");
         user.getRoles().add(roleService.getRole("ROLE_USER"));
         userService.addUser(user);
     }
